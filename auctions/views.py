@@ -4,11 +4,23 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from .models import User
+from django.contrib.auth.decorators import login_required
+from datetime import datetime
+
+from .models import User, Auction_listing, User_listing
 
 
 def index(request):
-    return render(request, "auctions/index.html")
+    user_item_list = User_listing.objects.filter(user_id = request.user.id)
+    item_listing = []
+    for item in user_item_list:
+        list = Auction_listing.objects.get(pk = item.item_id)
+        print(list)
+        item_listing.append(list)
+  
+
+    return render(request, "auctions/index.html",
+        {"item_listing": item_listing} )
 
 
 def login_view(request):
@@ -61,3 +73,50 @@ def register(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "auctions/register.html")
+
+@login_required()
+def create(request):
+    if request.method == "POST":
+    #Obtener el user , El id del item al ingresarlo en la tabla
+        item_title = request.POST["title"]
+        item_description = request.POST["description"]
+        item_url = request.POST["url"]
+        item_startbid = request.POST["startbid"]
+        item_category = request.POST["category"]
+        user=User.objects.get(pk=request.user.id)
+        item_created= datetime.now()
+
+        listing = Auction_listing.objects.create(
+            #user = user,
+            item_title = item_title,
+            item_description = item_description,
+            item_url = item_url,
+            item_startbid = item_startbid,
+            item_category = item_category,
+            item_created = item_created,
+            item_active = True
+            ) 
+
+        listing.save()
+
+        user_list = User_listing.objects.create(
+            user_id = user.id,
+            item_id = listing.id
+        )
+        print(user.id, " + ", listing.id)        
+        
+        #user = User.objects.create_user(username, email, password)
+        #user.save()
+        categories = ['electronics', 'home', 'books', 'smartphones & tablets', 'computer', 'home repair']
+        return render(request, "auctions/create.html", {"categories" : categories})
+
+
+    else:
+       
+        print (request.user)
+        
+        categories = ['electronics', 'home', 'books', 'smartphones & tablets', 'computer', 'home repair']
+        return render(request, "auctions/create.html", {"categories" : categories})
+
+    #Obtener el user , El id del item al ingresarlo en la tabla
+

@@ -1,7 +1,30 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-    <h2>Active Listings</h2>
+    
 
-    TODO
+    {% if user.is_authenticated %}
+    <h2>Active Listings</h2>
+        {% for item in item_listing%}
+            <Center>
+               <h3> {{item.item_title}}</h3> 
+               <img src="{{item.item_url}}" width="150" height="150">
+               <ul>
+                   <li> <b>Starting bid:</b> ${{item.item_startbid}} </li>
+                   <li> {{item.item_category}} </li>
+                    <li>
+                        <h4>Description:</h4>
+                        <p> {{item.item_description}}</p>
+                    </li>
+                    <li> {{item.item_created}} </li>
+
+                </ul>
+                ***********************************************************
+            </Center>
+        {% endfor %}
+
+    {% else %}
+        <h2> Log in and sell/buy with US!! </h2>
+    {% endif %}
+
 {% endblock %}
