@@ -1,0 +1,91 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    
+
+    {% if user.is_authenticated %}
+    <h2>Active Listings</h2>
+        
+            <Center>
+                {% if owner == True %}
+                <br>
+                <form action="{% url 'closing' %}" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" id="item_pk" name="item_pk" value={{item.pk}}>              
+                    <input type="submit" value="Close">
+                  </form> <br><br>
+
+                {% endif %}
+                <h3> {{item.item_title}}</h3>
+               <img src="{{item.item_url}}" width="150" height="150">
+               <ul>
+                                
+                   <li> {{item.item_category}} </li>
+
+                   {% if item.item_active == True%}
+                        <li> <b>Active Item </b> </li>
+                            {% else%}
+                        <li> <b>Closed Item </b></li>
+        
+                            {% endif %}
+
+                    {% if watched == True%}
+                        <li> <a href="/watch/{{item.pk}}"> <i>Unwatch </i> </a> </li>
+                            {% else%}
+                        <li> <a href="/watch/{{item.pk}}"> <i>Watch </i> </a>  </li>
+            
+                            {% endif %}
+
+
+                    <li> {{item.item_created}} </li>
+
+
+                    <li> <b>Actual Bid:</b> ${{item.item_startbid}} </li>
+             
+                    <form action="{% url 'bidding' %}" method="POST">
+                        {% csrf_token %}
+                        <label for="bid"><b>Your Bib</b>:</label>
+                        <input type="number" id="new_bid" name="new_bid">
+                        <input type="hidden" id="item_pk" name="item_pk" value={{item.pk}}><br>
+                      
+                        <input type="submit" value="Submit">
+                      </form>
+                </ul>
+                ***********************************************************
+                <div id="comentar">
+                    <form action="{% url 'comment' %}" method="POST">
+                        {% csrf_token %}
+                        <label for="comment"><b>comment:</b>:</label><br>
+                            <textarea name="comment" rows="5" cols="50"></textarea> <br>
+                        <input type="hidden" id="item_pk" name="item_pk" value={{item.pk}}><br>
+                      
+                        <input type="submit" value="Post">
+                      </form><br>
+
+
+                </div>
+                ********************************************************************
+                <div>
+
+                    {% for comment in comments %}
+
+                    <ul>
+
+                        <li> {{comment.user_id}} </li>
+                        <li> <p> {{comment.comment}} </p> </li>
+
+                    </ul>
+
+                    {% endfor%}
+
+                </div>
+
+
+            </Center>
+       
+
+    {% else %}
+        <h2> Log in and sell/buy with US!! </h2>
+    {% endif %}
+
+{% endblock %}

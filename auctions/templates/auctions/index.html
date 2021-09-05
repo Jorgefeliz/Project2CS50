@@ -3,28 +3,29 @@
 {% block body %}
     
 
-    {% if user.is_authenticated %}
-    <h2>Active Listings</h2>
+ 
+    <h2>{{message}}</h2>
         {% for item in item_listing%}
+        <div>
             <Center>
-               <h3> {{item.item_title}}</h3> 
+               <a href="/auctions/{{item.pk}}"> <h3> {{item.item_title}}</h3> </a>
                <img src="{{item.item_url}}" width="150" height="150">
                <ul>
-                   <li> <b>Starting bid:</b> ${{item.item_startbid}} </li>
+                   <li> <b>Bid:</b> ${{item.item_startbid}} </li>
                    <li> {{item.item_category}} </li>
                     <li>
                         <h4>Description:</h4>
-                        <p> {{item.item_description}}</p>
+                        <p width="200px"> {{item.item_description}}</p>
                     </li>
                     <li> {{item.item_created}} </li>
 
                 </ul>
                 ***********************************************************
             </Center>
+                
+        </div>
         {% endfor %}
 
-    {% else %}
-        <h2> Log in and sell/buy with US!! </h2>
-    {% endif %}
+
 
 {% endblock %}

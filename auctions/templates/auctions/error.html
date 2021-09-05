@@ -1,0 +1,20 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    
+
+    {% if user.is_authenticated %}
+    <h2>Active Listings</h2>
+        
+            <Center>
+           
+                <h3> <b> {{message}} </b> </h3>
+
+            </Center>
+       
+
+    {% else %}
+        <h2> Log in and sell/buy with US!! </h2>
+    {% endif %}
+
+{% endblock %}
