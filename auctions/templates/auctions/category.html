@@ -1,0 +1,29 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    
+
+ 
+    <h2>{{message}}</h2>
+       
+        <div>
+            <Center>
+                <form action="{% url 'categories' %}" method="POST">
+                    {% csrf_token %}
+                <label >Choose a category:</label>
+                <select id="category" name="category">
+                    {% for category in categories%}
+                <option value={{category}}>{{category}}  </option>
+                    {% endfor %}
+
+                <input type="submit" value="Search"> 
+                </form>
+                ***********************************************************
+            </Center>
+                
+        </div>
+
+
+
+
+{% endblock %}

@@ -118,17 +118,18 @@ def create(request):
         
         #user = User.objects.create_user(username, email, password)
         #user.save()
-        categories = ['electronics', 'home', 'books', 'smartphones & tablets', 'computer', 'home repair']
-        return render(request, "auctions/create.html", {"categories" : categories})
+        return render(request, "auctions/create.html", {"categories" : list_categories()})
 
 
     else:
-       
-            
-        categories = ['electronics', 'home', 'books', 'smartphones & tablets', 'computer', 'home repair']
-        return render(request, "auctions/create.html", {"categories" : categories})
+        return render(request, "auctions/create.html", {"categories" : list_categories()})
 
     #Obtener el user , El id del item al ingresarlo en la tabla
+
+def list_categories():
+    categories = ['electronics', 'home', 'books', 'smartphones & tablets', 'computer', 'home repair']
+    return categories
+
 
 def auctions(request, item_id):
     item_id = int(item_id)
@@ -140,38 +141,34 @@ def auctions(request, item_id):
     if request.user.id != None:
         user_id = User.objects.get(pk=request.user.id)
         user_listings = User_listing.objects.filter(user_id = user_id) #queryset
-
-        ##
-        # crear una funcion que me devuelva los item del watchlist
-        visto = False # eliminar luego de la funcion
  
         for listing in user_listings:
             if listing.item_id == lista:
                 owner = True
                 break
 
-    else:
-        visto = False
-        #owner = False #valor para enviar a la pagina 
-
-    
-
-
     comments = Comment.objects.filter(item_id = lista) 
     comentario = []
     for comment in comments:
-        print(comment.comment)
         comentario.append(comment)
-
-    
 
 
     return render(request, "auctions/item_bidding.html",{
             "item": lista,
             "comments": comentario,
             "owner": owner,
-            "watched": visto
+            "watched": IsWatched(item_id, request.user.id)
             } )
+
+def IsWatched(item_pk, user_pk):
+        
+    try:
+        mirados = Watchlist.objects.filter(item_pk = item_pk).get(user_pk = user_pk)
+        return True
+
+    except Watchlist.DoesNotExist:
+        return False   
+      
 
 def bidding (request):
     if request.method == "POST":
@@ -228,7 +225,7 @@ def won_listing(request):
     for item in lista:
         won.append(item)
     
-    message = "Won Listing"
+    message = "Items Won"
     return render(request, "auctions/index.html", {
         "item_listing" : won,
         "message": message
@@ -252,14 +249,17 @@ def comment(request):
     return HttpResponseRedirect(reverse("auctions", kwargs={"item_id": item_pk}))
 
 def watchlist(request):
-    user = User.objects.get(pk=request.user.id)
-    visto = Watchlist.objects.filter(user_id = user).filter(watched=True)
+    user_pk = request.user.id
+
+    mirados = Watchlist.objects.filter(user_pk = user_pk)
+ 
+    watched_id = []
+    for vista in mirados:
+        watched_id.append(vista)    
     
-
-
     watched = []
-    for item in visto:
-        watched.append(item.item_id)
+    for item in watched_id:
+        watched.append(Auction_listing.objects.get(pk = item.item_pk))
 
     
 
@@ -271,30 +271,42 @@ def watchlist(request):
 
 def watch(request, item_id):
     item_pk = int(item_id)
-    lista = Auction_listing.objects.get(pk = item_pk)
-    user_id = User.objects.get(pk=request.user.id)
+    user_pk = request.user.id
     
     try:
-        mirados = Watchlist.objects.filter(item_id = item_id).get(user_id = user_id)
+        mirados = Watchlist.objects.filter(item_pk = item_pk).get(user_pk = user_pk)
         print(mirados)
-    except IntegrityError:
+    except Watchlist.DoesNotExist:
         watched = Watchlist.objects.create(
-            user_id = user_id,
-            item_id = lista,
-            watched = True
+            user_pk = user_pk,
+            item_pk = item_pk,
         )
         watched.save()
         return HttpResponseRedirect(reverse("auctions", kwargs={"item_id": item_pk}))
     
-  
-    else:
-        watched = Watchlist.objects.get(item_id = lista)
-
-        if watched.watched == True:
-            watched.watched = False
-        else:
-            watched.watched = True
-    
-    watched.save()
+    mirados.delete()
 
     return HttpResponseRedirect(reverse("auctions", kwargs={"item_id": item_pk}))
+
+def categories(request):
+    if request.method == "POST":
+        item_category = request.POST["category"]
+        lista = Auction_listing.objects.filter(item_category = item_category)
+        item_listing = []
+
+        for item in lista:
+            item_listing.append(item)
+        
+        message = "Category Search"
+        return render(request, "auctions/index.html",
+        {
+        "item_listing": item_listing,
+        "message": message        
+        })
+
+    else:
+        message = "Search by Categories"
+        return render(request, "auctions/category.html",
+        {"message" : message,
+        "categories" : list_categories()
+        })
