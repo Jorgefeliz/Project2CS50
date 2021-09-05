@@ -20,7 +20,6 @@ def index(request):
     lists = Auction_listing.objects.filter(item_active = True)
     for lista in lists:
         item_listing.append(lista)
-    #print(item_listing)
   
     message = "Active listing"
     return render(request, "auctions/index.html",
@@ -205,7 +204,7 @@ def bidding (request):
             message = "The auction is already closed"
             return render(request, "auctions/error.html", {"message" : message })
 
-        #no need it, remover. Toda action cae entre if y else
+     
         return HttpResponseRedirect(reverse("auctions", kwargs={"item_id": item_pk}))
 
 @login_required()

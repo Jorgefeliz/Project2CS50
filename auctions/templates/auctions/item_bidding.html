@@ -24,9 +24,10 @@
 
                    {% if item.item_active == True%}
                         <li> <b>Active Item </b> </li>
+                        
                             {% else%}
                         <li> <b>Closed Item </b></li>
-        
+                        <li> Winner:  <b>{{item.user_id}} </b></li>
                             {% endif %}
 
                     {% if watched == True%}
